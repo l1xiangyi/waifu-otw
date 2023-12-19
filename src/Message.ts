@@ -1,56 +1,69 @@
 import NLP from "./NLP";
-import Live2D from './Live2D';
+import Live2D from "./Live2D";
 
 const { model, motions } = Live2D;
-const form = <HTMLFormElement>document.getElementById('form');
-const input = <HTMLInputElement>document.getElementById('message');
-const messages = <HTMLElement>document.getElementById('messages');
+const form = <HTMLFormElement>document.getElementById("form");
+const input = <HTMLInputElement>document.getElementById("message");
+const messages = <HTMLElement>document.getElementById("messages");
 
-const createMessage = (sender: 'user' | 'reply', message: string) => {
-  const div = document.createElement('div');
+const createMessage = (sender: "user" | "reply", message: string) => {
+  const div = document.createElement("div");
 
   div.className = sender;
   div.innerText = message;
 
   messages.append(div);
   div.scrollIntoView();
-}
+};
 
 const processMessage = async (message: string) => {
   // random delay for "authenticity"
   const delay = Math.random() * 1000 + 300;
-  const res = await NLP.process(message)
-  const { answer, intent } = res;
+  const res = await NLP.process(message);
+  const resOpenAI = await fetch(`http://localhost:3000/api/message`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: message,
+    }),
+  });
+  console.log(resOpenAI);
+  const { intent } = res;
+  const data = await resOpenAI.json();
+  const answer = data.choices[0].message.content;
 
   // decide which motion to use by getting the last dot in intent
   const intentMotion = intent.match(/\.(\w+)$/)?.[1];
-  const motionGroup = intent === 'None'
-    ? 'disagree'
-    : intentMotion in motions
+  const motionGroup =
+    intent === "None"
+      ? "disagree"
+      : intentMotion in motions
       ? intentMotion
-      : 'talk';
+      : "talk";
 
   // randomize motion group
   const random = Math.round(Math.random() * (motions[motionGroup].length - 1));
   const motion = motions[motionGroup][random];
 
   setTimeout(() => {
-    createMessage('reply', answer || "Sorry, I don't speak that language");
+    createMessage("reply", answer || "Sorry, I don't speak that language");
     model.motion(motion[0], motion[1]);
   }, delay);
-}
+};
 
-form.addEventListener('submit', (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
 
   const message = input.value.trim();
 
   if (!message.length) return;
 
-  createMessage('user', message);
+  createMessage("user", message);
   processMessage(message);
 
-  input.value = '';
+  input.value = "";
 });
 
 export { createMessage, processMessage };
