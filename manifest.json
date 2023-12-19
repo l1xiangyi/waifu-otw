@@ -3,14 +3,14 @@
   "name": "Kimi",
   "icons": [
     {
-      "src": "public/favicon.png",
+      "src": "https://imaginix-web.vercel.app/favicon.png",
       "type": "image/png",
       "sizes": "1024x1024"
     }
   ],
-  "start_url": "index.html",
+  "start_url": "https://imaginix-web.vercel.app/index.html",
   "background_color": "#3367D6",
   "display": "standalone",
-  "scope": "/",
+  "scope": "https://imaginix-web.vercel.app/",
   "theme_color": "#3367D6"
 }
